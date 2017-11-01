@@ -1,0 +1,90 @@
+ html, body, input, button {
+  font-family: 'Open Sans';
+  font-size: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+div, header, footer {
+  box-sizing: border-box;
+}
+
+.main {
+  float: left;
+  width: 100%;
+}
+
+header {
+  float: left;
+  width: 100%;
+  margin-bottom: 1em;
+  background: #f2f2f2;
+  padding: 1em;
+}
+
+header .game-title {
+  margin: 0;
+}
+
+header .title {
+  float: left;
+}
+
+header .scores {
+  float:right;
+}
+
+header .scores span {
+  display: inline-block;
+  margin-left: 1em;
+  font-size: .75em;
+}
+
+section {
+  padding: 1em;
+}
+
+.player-turn {
+  text-align: center;
+}
+
+.movie-count {
+  float: right;
+}
+
+footer {
+  margin: 2em 0;
+  padding: 1em;
+}
+
+.game-control {
+  padding: .5em;
+  font-size: .75em;
+  font-weight: bold;
+  background-color: #f58f22;
+  border: 0px;
+  color: white;
+  cursor: pointer;
+}
+
+.correct-answer-msg {
+  width: 100%;
+  background-color: green;
+  clear: both;
+  padding: .5em;
+  color: white;
+}
+
+.incorrect-answer-msg {
+  width: 100%;
+  background-color: red;
+  clear: both;
+  padding: .5em;
+  color: white;
+}
+
+
+.winner-label {
+  text-align: center;
+  color: green;
+}

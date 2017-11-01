@@ -12,6 +12,6 @@ export default {
 }
  ```
 
-run `npm run build`
+run `npm i` then `npm run build`
 
 Currently there is no localhost server, so you'll need to open the index.html directly with a browser.

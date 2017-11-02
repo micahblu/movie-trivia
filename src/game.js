@@ -54,12 +54,15 @@ export default class Game extends React.Component {
     var self = this;
     fetch(request).then(function(response) {
       response.json().then(function(data) {
-        var firstMovie = data.results.shift();
-        console.log('movies', data.results)
+        var movies = data.results;
+        if(movies.length % 2 !== 0) {
+          // odd number of movies remove one
+          movies.pop();
+        }
         self.setState({
-          movies: data.results,
+          movies: movies,
           gameLoading: false,
-          movie: firstMovie
+          movie: movies.shift()
         });
       });
     }).catch(function(err) {
@@ -111,29 +114,43 @@ export default class Game extends React.Component {
   }
 
   declareWinner() {
-    var sortedPlayers = this.state.players.sort((a, b) => {
-      if(a.score > b.score) {
-        return 1;
-      }
-      if(a.score < b.score) {
-        return -1;
-      }
-      return 0;
-    });
-
-    this.setState({
-      winner: sortedPlayers[0].id,
-      isActive: false
-    });
+    if(this.state.players[0].score === this.state.players[1].score) {
+      this.setState({
+        winner: 'tie',
+        isActive: false
+      });
+    } else {
+      var sortedPlayers = this.state.players.sort((a, b) => {
+        return a.score < b.score
+      });
+  
+      this.setState({
+        winner: sortedPlayers[0].id,
+        isActive: false
+      });
+    }
   }
 
   handleSubmit(e) {
     var self = this;
-
-    if(this.state.movies.length === 1) {
-      this.declareWinner();
-      e.preventDefault();
-      return;
+    var cb = function() {
+      if (self.state.movies.length === 0) {
+        self.declareWinner();
+      } else {
+        self.setState({
+          answer: '',
+          answerSubmitted: true,
+          prevMovie: self.state.movie
+        });
+  
+        setTimeout(function () {
+          self.setState({
+            answerSubmitted: false
+          });
+        }, 3500);
+  
+        self.loadNextMovie();
+      }
     }
     // Don't require an exact match.
     var answer = this.state.answer.toLocaleLowerCase().trim();
@@ -153,6 +170,8 @@ export default class Game extends React.Component {
           currentPlayer: (prevState.players[prevState.currentPlayer + 1] ? prevState.currentPlayer + 1 : 0),
           isCorrect: true
         };
+      }, function() {
+        cb();
       });
       this.successSound.play();
     } else {
@@ -170,28 +189,22 @@ export default class Game extends React.Component {
           currentPlayer: (prevState.players[prevState.currentPlayer + 1] ? prevState.currentPlayer + 1 : 0),
           isCorrect: false
         };
+      }, function() {
+        cb();
       });
       this.errorSound.play();
     }
-
-    this.setState({
-      answer: '',
-      answerSubmitted: true,
-      prevMovie: this.state.movie
-    });
-
-    setTimeout(function() {
-      self.setState({
-        answerSubmitted: false
-      });
-    }, 3500);
-
-    this.loadNextMovie();
 
     e.preventDefault();
   }
 
   render() {
+    var winner;
+    if(this.state.winner === "tie") {
+      winner = <h3>Its a tie!</h3>
+    } else {
+      winner = <h3>Player {this.state.winner} wins!</h3>
+    }
     return (
       <div className='game'>
         <div className='main'>
@@ -209,13 +222,10 @@ export default class Game extends React.Component {
           </header>
 
           <div className='winner-label' style={{display: this.state.winner ? 'block' : 'none'}}>
-            <h3>Player {this.state.winner} wins!</h3>
+            { winner }
           </div>
 
           <section style={{display: this.state.isActive ? 'block' : 'none'}}>
-            <div className='winner-label' style={{display: this.state.winner ? 'block' : 'none'}}>
-              <h3>Player {this.state.winner} wins!</h3>
-            </div>
             <div style={{display: this.state.answerSubmitted ? 'block' : 'none'}}>
               <div style={{ display: this.state.isCorrect ? 'block' : 'none' }} className="correct-answer-msg">Correct! <strong>&quot;{this.state.prevMovie.title}&quot;</strong></div>
               <div style={{display: this.state.isCorrect ? 'none' : 'block'}} className="incorrect-answer-msg">Incorrect :( The answer was <strong>&quot;{this.state.prevMovie.title}&quot;</strong></div>

@@ -21522,12 +21522,17 @@
 	      var self = this;
 	      fetch(request).then(function (response) {
 	        response.json().then(function (data) {
-	          var firstMovie = data.results.shift();
-	          console.log('movies', data.results);
+	          var movies = data.results;
+	          if (movies.length % 2 !== 0) {
+	            // odd number of movies remove one
+	            movies.pop();
+	          }
+
+	          console.log('movies', movies);
 	          self.setState({
-	            movies: data.results,
+	            movies: movies,
 	            gameLoading: false,
-	            movie: firstMovie
+	            movie: movies.shift()
 	          });
 	        });
 	      }).catch(function (err) {
@@ -21588,31 +21593,45 @@
 	  }, {
 	    key: 'declareWinner',
 	    value: function declareWinner() {
-	      var sortedPlayers = this.state.players.sort(function (a, b) {
-	        if (a.score > b.score) {
-	          return 1;
-	        }
-	        if (a.score < b.score) {
-	          return -1;
-	        }
-	        return 0;
-	      });
+	      if (this.state.players[0].score === this.state.players[1].score) {
+	        this.setState({
+	          winner: 'tie',
+	          isActive: false
+	        });
+	      } else {
+	        var sortedPlayers = this.state.players.sort(function (a, b) {
+	          return a.score < b.score;
+	        });
 
-	      this.setState({
-	        winner: sortedPlayers[0].id,
-	        isActive: false
-	      });
+	        this.setState({
+	          winner: sortedPlayers[0].id,
+	          isActive: false
+	        });
+	      }
 	    }
 	  }, {
 	    key: 'handleSubmit',
 	    value: function handleSubmit(e) {
 	      var self = this;
+	      var cb = function cb() {
+	        if (self.state.movies.length === 0) {
+	          self.declareWinner();
+	        } else {
+	          self.setState({
+	            answer: '',
+	            answerSubmitted: true,
+	            prevMovie: self.state.movie
+	          });
 
-	      if (this.state.movies.length === 1) {
-	        this.declareWinner();
-	        e.preventDefault();
-	        return;
-	      }
+	          setTimeout(function () {
+	            self.setState({
+	              answerSubmitted: false
+	            });
+	          }, 3500);
+
+	          self.loadNextMovie();
+	        }
+	      };
 	      // Don't require an exact match.
 	      var answer = this.state.answer.toLocaleLowerCase().trim();
 	      if (answer !== '' && this.state.movie.title.toLowerCase().includes(answer)) {
@@ -21631,6 +21650,8 @@
 	            currentPlayer: prevState.players[prevState.currentPlayer + 1] ? prevState.currentPlayer + 1 : 0,
 	            isCorrect: true
 	          };
+	        }, function () {
+	          cb();
 	        });
 	        this.successSound.play();
 	      } else {
@@ -21648,29 +21669,33 @@
 	            currentPlayer: prevState.players[prevState.currentPlayer + 1] ? prevState.currentPlayer + 1 : 0,
 	            isCorrect: false
 	          };
+	        }, function () {
+	          cb();
 	        });
 	        this.errorSound.play();
 	      }
-
-	      this.setState({
-	        answer: '',
-	        answerSubmitted: true,
-	        prevMovie: this.state.movie
-	      });
-
-	      setTimeout(function () {
-	        self.setState({
-	          answerSubmitted: false
-	        });
-	      }, 3500);
-
-	      this.loadNextMovie();
 
 	      e.preventDefault();
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var winner;
+	      if (this.state.winner === "tie") {
+	        winner = _react2.default.createElement(
+	          'h3',
+	          null,
+	          'Its a tie!'
+	        );
+	      } else {
+	        winner = _react2.default.createElement(
+	          'h3',
+	          null,
+	          'Player ',
+	          this.state.winner,
+	          ' wins!'
+	        );
+	      }
 	      return _react2.default.createElement(
 	        'div',
 	        { className: 'game' },
@@ -21708,28 +21733,11 @@
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'winner-label', style: { display: this.state.winner ? 'block' : 'none' } },
-	            _react2.default.createElement(
-	              'h3',
-	              null,
-	              'Player ',
-	              this.state.winner,
-	              ' wins!'
-	            )
+	            winner
 	          ),
 	          _react2.default.createElement(
 	            'section',
 	            { style: { display: this.state.isActive ? 'block' : 'none' } },
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'winner-label', style: { display: this.state.winner ? 'block' : 'none' } },
-	              _react2.default.createElement(
-	                'h3',
-	                null,
-	                'Player ',
-	                this.state.winner,
-	                ' wins!'
-	              )
-	            ),
 	            _react2.default.createElement(
 	              'div',
 	              { style: { display: this.state.answerSubmitted ? 'block' : 'none' } },

@@ -136,7 +136,7 @@ export default class Game extends React.Component {
       return;
     }
     // Don't require an exact match.
-    if (this.state.movie.title.toLowerCase().includes(this.state.answer.toLocaleLowerCase())) {
+    if (this.state.movie.title.toLowerCase().trim() !== '' && this.state.movie.title.toLowerCase().includes(this.state.answer.toLocaleLowerCase())) {
 
       this.setState((prevState) => {
         return {

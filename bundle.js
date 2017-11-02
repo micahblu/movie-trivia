@@ -21614,7 +21614,8 @@
 	        return;
 	      }
 	      // Don't require an exact match.
-	      if (this.state.movie.title.toLowerCase().includes(this.state.answer.toLocaleLowerCase())) {
+	      var answer = this.state.answer.toLocaleLowerCase().trim();
+	      if (answer !== '' && this.state.movie.title.toLowerCase().includes(answer)) {
 
 	        this.setState(function (prevState) {
 	          return {
